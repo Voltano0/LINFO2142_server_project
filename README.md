@@ -62,7 +62,7 @@ Host gateway
     HostName 130.104.78.202             # IP address of the SSH gateway
     User rasp                           # Username used to connect to the SSH gateway
     IdentityFile ~/.ssh/id_ed25519      # Path to the private SSH key
-    ProxyJump UCL
+    ProxyJump UCLhttps://containerlab.dev/manual/kinds/bridge/#linux-bridge
 
 Host UCL
     HostName studssh.info.ucl.ac.be     # IP address of the UCLouvain gateway
@@ -79,5 +79,25 @@ docker buildx create --use
 
 
 sudo containerlab deploy --topo my-topology.clab.yml
+
+sudo brctl addbr br0  # Create the bridge
+sudo ip link set br0 up  # Bring the bridge up
+
+
+
+
+
+
+sudo docker exec -it <container_id_of_r0> /bin/sh
+
+router isis
+  net fc00:2142:XX:00  # Your specific IPv6 prefix
+  metric 10
+  passive-interface eth0
+  passive-interface eth1
+
+echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
+
+vtysh -c "wr"
 
 ## Part Four : hosting services in our VI
