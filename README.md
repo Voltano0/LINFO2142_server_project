@@ -73,4 +73,10 @@ We can simply use **ssh rasp** to connect to our RPI since rasp jump to gateway 
 
 ## Part Two : hardening your RPI
 ## Part Three : networking in a virtual infrastructure
+sudo apt-get install qemu-user-static
+docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+
+
+sudo containerlab deploy --topo my-topology.clab.yml
+
 ## Part Four : hosting services in our VI
