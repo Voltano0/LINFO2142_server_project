@@ -1,0 +1,42 @@
+name: rpi1
+topology:
+  nodes:
+    br0:
+      kind: bridge
+    r0:
+      kind: host
+      config: |
+        sysctl:
+          - net.ipv6.conf.all.forwarding=1  # Enable IPv6 forwarding
+        interfaces:
+          - name: upstream
+            bridge: br0
+          - name: eth0
+            ipv6: fc00:2142:07::1/127  
+          - name: eth1
+        isis:
+          level: 1
+          interfaces:
+            - name: upstream
+              type: point-to-point
+            - name: eth0
+              passive: true
+            - name: eth1
+              passive: true
+    dns1:
+      kind: container
+      config: |
+        interfaces:
+          - name: eth0
+            ipv6: fc00:2142:07::2/127  
+    svcs1:
+      kind: container
+      config: |
+        interfaces:
+          - name: eth0
+            
+    
+  links:
+    - endpoints: ["r0:upstream", "br0:container"]  # Link between router and bridge
+    - endpoints: ["r0:eth0", "dns1:eth0"]  # Link between router and DNS container
+    - endpoints: ["r0:eth1", "svcs1:eth0"]  # Link from router to service container
