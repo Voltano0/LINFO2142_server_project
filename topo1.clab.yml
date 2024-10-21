@@ -10,12 +10,12 @@ topology:
       image: frrouting/frr
       network-mode: none
     dns1:
-      kind: container
+      kind: linux
       image: alpine
       network-mode: none
 
     svcs1:
-      kind: container
+      kind: linux
       image: alpine
       network-mode: none
     
