@@ -6,21 +6,23 @@ This project aims to create a resilient server infrastructure using two Raspberr
 The project is divided into four phases. This README outlines the work completed to achieve thoses phases.
 
 ## 1. Basic configuration
+
 ### Step 1 : installing the OS
 
-To start, we installed a lightweight, Linux-based OS suitable for the Raspberry Pi. We used the Raspberry Pi Imager tool to flash the latest version of Raspberry Pi OS onto the SD card.
- > Note that usual OS like ubuntu can be too heavy for a RPI 
+To start, we installed a lightweight, Linux-based OS suitable for the Raspberry Pi. We used the *Raspberry Pi Imager* tool to flash the latest version of *Raspberry Pi OS* onto the SD card.
+ > Note that usual OS, like ubuntu, can be too heavy for a RPI 
 After completing the installation, we are ready to move on.
 
 ### Step 2 : creating a VLAN interface
-Since our RPI's will be in the UCLouvain server, we need to create a VLAN to acces it. The ID of this vlan is calculate via 254 + XX where XX is our group number, wich is *7*. The IPv6 address of the VLAN differ from the RPI, one have the ::2/64 and the other have ::3/64.
+
+Since our RPIs will be in the UCLouvain server, we need to create a VLAN for access. The VLAN ID is calculated as *254 + XX*, where *XX* is our group number, which in our case is *7*. The IPv6 address assigned to each Raspberry Pi varies: one has *::2/64* and the other *::3/64*.
 
 In RPI shell :
-1. Acces the Network interfaces files
+1. Access the network interfaces file:
 ``` 
 sudo nano /etc/network/interfaces
 ```
-2. Configure the file.
+2. Configure the file as follows:
 ```
 # Automatically start the eth0.261 interface on boot
 auto eth0.261
@@ -37,42 +39,32 @@ iface eth0.261 inet6 static
     # Specify eth0 as the underlying physical device for VLAN 261
     vlan-raw-device eth0
 ```
-SInce we are working inside the interfaces file, the configuration of our VLAN is persistent across reboots.
+Since we’re editing the *interfaces* file, this VLAN configuration persists across reboots.
 
 ### Step 3 : configure SSH connection
 
-To configure a connection between our RPI and our computers we must create a key following the guidelines : ED25519 key containing the username used on our RPI. To create such a key, we use this commands :
+To enable SSH access between our RPI and computer, we must create an *ED25519* SSH key containing the username *rasp* as requested in the guidelines. We generate the key with this command:
 
 In computer shell
 ```
 ssh-keygen -t ed25519 -C "rasp" -f ~/.ssh/id_ed25519_rasp
-
 ```
-In this command,*-t* specifies the key type, *-C* allow us to add a label and *-f* allow us to choose the path of the file containing the key.
+- *-t* specifies the key type, 
+- *-C* allow us to add a label
+- *-f* specifies the path of the file containing the key.
 
 To finalize the configuration, we must add our public generated key into the *.ssh/authorized_keys* file in our RPI.
 
+### Step 4 : configure SSH configuration file
 
+The SSH connection created in step 3 works when we have direct access to the RPI. For the further phase, once our RPI is placed within the school’s infrastructure, we will need to go through multiple gateways to access it. To achieve this, we configure our SSH config file.
 
-
-
-
-
-
-
-
-1. The SSH key must be an ED25519 one and it must contain the username used on our RPI wich is **rasp**.
-2. We must establish a multi-hop SSh access through two gateways : 
-  1. UCLouvain : studdssh.info.ucl.ac.be
-  2. INfrastructure : 130.104.78.202
-
-We open the ssh config file :
-
-In C shell : 
+In computer shell :
+1. Access the config file
 ```
 nano ~/.ssh/config
 ```
-And copy :
+2. Configure as follow
 ```
 Host rasp
     HostName fc00:2142:ff07::2          # IP address of RPI
@@ -91,7 +83,7 @@ Host UCL
     User <Login UCL>                    # Username used to connect to UCLouvain network
     IdentityFile ~/.ssh/id_rsa          # Path to the private SSH key
 ```
-We can simply use **ssh rasp** to connect to our RPI since rasp jump to gateway that jump to the UCL gateway.
+Once configured, we can simply use *ssh rasp* to connect to the RPI, as rasp will automatically jump through the gateway and UCL gateway to reach it.
 
 ## 2. Hardening your RPI
 ## 3. Networking in a virtual infrastructure
