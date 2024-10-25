@@ -11,6 +11,7 @@ The project is divided into four phases. This README outlines the work completed
 
 To start, we installed a lightweight, Linux-based OS suitable for the Raspberry Pi. We used the *Raspberry Pi Imager* tool to flash the latest version of *Raspberry Pi OS* onto the SD card.
  > Note that usual OS, like ubuntu, can be too heavy for a RPI 
+
 After completing the installation, we are ready to move on.
 
 ### Step 2 : creating a VLAN interface
@@ -53,7 +54,7 @@ ssh-keygen -t ed25519 -C "rasp" -f ~/.ssh/id_ed25519_rasp
 - *-C* allow us to add a label
 - *-f* specifies the path of the file containing the key.
 
-To finalize the configuration, we must add our public generated key into the *.ssh/authorized_keys* file in our RPI.
+To finalize the configuration, we must add our public generated key (contained inside the id_ed25519_rasp.pub file) into the *.ssh/authorized_keys* file in our RPI.
 
 ### Step 4 : configure SSH configuration file
 
@@ -85,7 +86,92 @@ Host UCL
 ```
 Once configured, we can simply use *ssh rasp* to connect to the RPI, as rasp will automatically jump through the gateway and UCL gateway to reach it.
 
-## 2. Hardening your RPI
+## 2. Security Hardening
+
+Now that remote access to the RPI is configured, we need to implement security measures to protect the infrastructure. The following steps will do it
+
+### Step 1 & 2 : restrict to pubkey authentification and disable the root access.
+
+To secure SSH access, we’ll disable password-based login, allowing only authentication via SSH keys. Moreover, we'll disanle the root access. To achieve that, we must : 
+
+In RPI shell :
+1. Open SSH config file
+```
+sudo nano /etc/ssh/sshd_config
+```
+2. Set the following parameters as follow :
+```
+#To disable tunneled clear text passwords, change to no here!
+PasswordAuthentication no
+#PermitEmptyPasswords no
+ChallengeResponseAuthentication no
+PermitRootLogin no
+PermitRootLogin prohibit-password
+```
+- *PasswordAuthentication no*: Only allows login with SSH keys.
+- *ChallengeResponseAuthentication no*: Disables interactive authentication, further protecting the server.
+- *PermitRootLogin no*: Prevents root login
+
+3. Restart the SSH service
+```
+sudo systemctl restart ssh
+```
+
+### Step 3 : deploying a firewall
+To control access, we used UFW (Uncomplicated Firewall), a tool for managing firewall rules. Since UFW was not pre-installed and the RPI was already placed in the infrastructure (without internet access), we downloaded the *.deb* package on our computers and transferred it to the RPI using the *scp* command.
+
+Once the installation is done, we can use the following commands : 
+1. Allow SSH connections:
+```
+sudo ufw allow ssh
+```
+2. Set the default policies:
+```
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+```
+- *deny incoming*: Blocks all incoming traffic 
+- *allow outgoing*: Permits all outgoing traffic
+3. Enable UFW to activate the firewall settings:
+```
+sudo ufw enable
+```
+
+### Step 4 : protect from DDos attacks 
+Fail2Ban is a tool that automatically bans IP addresses showing signs of abusive behavior. This is why we use it to protect our server from DDos attacks. We use *Fail2Ban* and *rsyslog* for protection against DDoS attacks. Installation followed the same process as described in Step 3.
+
+In RPI shell
+1. Enable logging :
+```
+sudo systemctl enable fail2ban.service
+```
+2. Configure Fail2Ban
+  1. Open config file
+```
+sudo nano /etc/fail2ban/jail.local
+```
+  2. Add the following :
+```
+[sshd]
+enabled = true
+port = ssh
+filter = sshd
+logpath = /var/log/auth.log
+maxretry = 5
+bantime = 1200 
+```
+Where 
+- *enabled = true*: activates the rule for SSH.
+- *maxretry = 5*: Allows 5 failed login attempts before ban.
+- *bantime = 1200*: Sets the ban duration to 1200 seconds.
+
+3. Restart to apply changes
+```
+sudo systemctl restart fail2ban
+```
+
+With these settings, the Raspberry Pi is better protected.
+
 ## 3. Networking in a virtual infrastructure
 ```
 sudo apt-get install qemu-user-static
