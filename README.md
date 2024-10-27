@@ -1,4 +1,4 @@
-  GNU nano 7.2                                     README.md *                                            
+                                      
 # Server Project - LINFO2142 : Computer Network
 ## Context
 This project aims to create a resilient server infrastructure using two Raspberry Pis. Since we will work across multiple machines, the location of each command execution will be specified.
@@ -9,14 +9,14 @@ The project is divided into four phases. This README outlines the work completed
 
 ### Step 1 : installing the OS
 
-To start, we installed a lightweight, Linux-based OS suitable for the Raspberry Pi. We used the *Raspberry Pi Imager* tool to flash the latest version of *Raspberry Pi OS* onto the SD card.
+To start, we installed a lightweight, Linux-based OS suitable for the Raspberry Pi. We used the **Raspberry Pi Imager** tool to flash the latest version of **Raspberry Pi OS** onto the SD card.
  > Note that usual OS, like ubuntu, can be too heavy for a RPI 
 
 After completing the installation, we are ready to move on.
 
 ### Step 2 : creating a VLAN interface
 
-Since our RPIs will be in the UCLouvain server, we need to create a VLAN for access. The VLAN ID is calculated as *254 + XX*, where *XX* is our group number, which in our case is *7*. The IPv6 address assigned to each Raspberry Pi varies: one has *::2/64* and the other *::3/64*.
+Since our RPIs will be in the UCLouvain server, we need to create a VLAN for access. The VLAN ID is calculated as **254 + XX**, where **XX** is our group number, which in our case is **7**. The IPv6 address assigned to each Raspberry Pi varies: one has **::2/64** and the other **::3/64**.
 
 In RPI shell :
 1. Access the network interfaces file:
@@ -40,21 +40,21 @@ iface eth0.261 inet6 static
     # Specify eth0 as the underlying physical device for VLAN 261
     vlan-raw-device eth0
 ```
-Since we’re editing the *interfaces* file, this VLAN configuration persists across reboots.
+Since we’re editing the **interfaces** file, this VLAN configuration persists across reboots.
 
 ### Step 3 : configure SSH connection
 
-To enable SSH access between our RPI and computer, we must create an *ED25519* SSH key containing the username *rasp* as requested in the guidelines. We generate the key with this command:
+To enable SSH access between our RPI and computer, we must create an **ED25519** SSH key containing the username **rasp** as requested in the guidelines. We generate the key with this command:
 
 In computer shell
 ```
 ssh-keygen -t ed25519 -C "rasp" -f ~/.ssh/id_ed25519_rasp
 ```
-- *-t* specifies the key type, 
-- *-C* allow us to add a label
-- *-f* specifies the path of the file containing the key.
+- **-t** specifies the key type, 
+- **-C** allow us to add a label
+- **-f** specifies the path of the file containing the key.
 
-To finalize the configuration, we must add our public generated key (contained inside the id_ed25519_rasp.pub file) into the *.ssh/authorized_keys* file in our RPI.
+To finalize the configuration, we must add our public generated key (contained inside the id_ed25519_rasp.pub file) into the **.ssh/authorized_keys** file in our RPI.
 
 ### Step 4 : configure SSH configuration file
 
@@ -84,7 +84,7 @@ Host UCL
     User <Login UCL>                    # Username used to connect to UCLouvain network
     IdentityFile ~/.ssh/id_rsa          # Path to the private SSH key
 ```
-Once configured, we can simply use *ssh rasp* to connect to the RPI, as rasp will automatically jump through the gateway and UCL gateway to reach it.
+Once configured, we can simply use **ssh rasp** to connect to the RPI, as rasp will automatically jump through the gateway and UCL gateway to reach it.
 
 ## 2. Security Hardening
 
@@ -108,9 +108,9 @@ ChallengeResponseAuthentication no
 PermitRootLogin no
 PermitRootLogin prohibit-password
 ```
-- *PasswordAuthentication no*: Only allows login with SSH keys.
-- *ChallengeResponseAuthentication no*: Disables interactive authentication, further protecting the server.
-- *PermitRootLogin no*: Prevents root login
+- **PasswordAuthentication no**: Only allows login with SSH keys.
+- **ChallengeResponseAuthentication no**: Disables interactive authentication, further protecting the server.
+- **PermitRootLogin no**: Prevents root login
 
 3. Restart the SSH service
 ```
@@ -118,7 +118,7 @@ sudo systemctl restart ssh
 ```
 
 ### Step 3 : deploying a firewall
-To control access, we used UFW (Uncomplicated Firewall), a tool for managing firewall rules. Since UFW was not pre-installed and the RPI was already placed in the infrastructure (without internet access), we downloaded the *.deb* package on our computers and transferred it to the RPI using the *scp* command.
+To control access, we used UFW (Uncomplicated Firewall), a tool for managing firewall rules. Since UFW was not pre-installed and the RPI was already placed in the infrastructure (without internet access), we downloaded the **.deb** package on our computers and transferred it to the RPI using the **scp** command.
 
 Once the installation is done, we can use the following commands : 
 1. Allow SSH connections:
@@ -130,15 +130,15 @@ sudo ufw allow ssh
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 ```
-- *deny incoming*: Blocks all incoming traffic 
-- *allow outgoing*: Permits all outgoing traffic
+- **deny incoming**: Blocks all incoming traffic 
+- **allow outgoing**: Permits all outgoing traffic
 3. Enable UFW to activate the firewall settings:
 ```
 sudo ufw enable
 ```
 
 ### Step 4 : protect from DDos attacks 
-Fail2Ban is a tool that automatically bans IP addresses showing signs of abusive behavior. This is why we use it to protect our server from DDos attacks. We use *Fail2Ban* and *rsyslog* for protection against DDoS attacks. Installation followed the same process as described in Step 3.
+Fail2Ban is a tool that automatically bans IP addresses showing signs of abusive behavior. This is why we use it to protect our server from DDos attacks. We use **Fail2Ban** and **rsyslog** for protection against DDoS attacks. Installation followed the same process as described in Step 3.
 
 In RPI shell : 
 1. Enable logging :
@@ -161,9 +161,9 @@ maxretry = 5
 bantime = 1200 
 ```
 Where 
-- *enabled = true*: activates the rule for SSH.
-- *maxretry = 5*: Allows 5 failed login attempts before ban.
-- *bantime = 1200*: Sets the ban duration to 1200 seconds.
+- **enabled = true**: activates the rule for SSH.
+- **maxretry = 5**: Allows 5 failed login attempts before ban.
+- **bantime = 1200**: Sets the ban duration to 1200 seconds.
 
 3. Restart to apply changes
 ```
@@ -177,8 +177,8 @@ With these settings, the Raspberry Pi is better protected.
 In this phase, we’ll deploy a virtual network infrastructure using Infrastructure as Code (IaC) with the containerlab overlay on Docker. This setup enables services in containers and configures the network connecting them.
 
 ### Step 1 : building containers
-Since the RPI lacks internet access, we'll need to cross-build Docker containers on our local machine for the RPI’s architecture, wich is *aarch64*.
-To achieve such a goal, we do as follow : 
+Since the RPI lacks internet access, we'll need to cross-build Docker containers on our local machine for the RPI’s architecture, wich is **aarch64**.
+To achieve this, we used these steps:
 
 In computer shell :
 1. Install and enable multi-platform builds with qemu :
@@ -191,19 +191,55 @@ docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
 docker buildx create --use
 docker buildx build --platform linux/arm64 -t my-container .
 ```
-3. Save the container as tar archive
+3. Save the container as a tar archive
 ```
 docker save my-container > my-container.tar
 ```
-Once it is achieved, we *scp* the tar achive into our RPI. We simply load it after.
+Once completed, transfer the **.tar** archive to the RPI using **scp**. Afterward, load it on the RPI.
  
 In RPI shell : 
 ```
 docker load < my-container.tar
 ```
+### Step 3 : create the infrastructure
+Using containerlab, we’ll configure the network as shown in **Fig 1** of the guidelines file. First, create a **.clab.yml** file with the following contents:
+
+```
+name: rpi1
+topology:
+  nodes:
+    br0:
+      kind: bridge
+      network-mode: none
+
+    r0:
+      kind: host
+      image: frrouting/frr
+      network-mode: none
+    dns1:
+      kind: linux
+      image: alpine
+      network-mode: none
+
+    svcs1:
+      kind: linux
+      image: alpine
+      network-mode: none
+    
+  links:
+    - endpoints: ["r0:upstream", "br0:container"]  # Link between router and bridge
+    - endpoints: ["r0:eth0", "dns1:eth0"]  # Link between router and DNS container
+    - endpoints: ["r0:eth1", "svcs1:eth0"]  # Link from router to service container
+```
+This configuration defines our topology. 
+> Note: The frrouting/frr image must be downloaded and transferred to the RPI using scp.
+After transferring the **.clab.yml** file to the RPI, deploy the configuration with:
+
+In RPI shell :
 ```
 sudo containerlab deploy --topo my-topology.clab.yml
-
+```
+## 4. hosting services in our VI
 sudo brctl addbr br0  # Create the bridge
 sudo ip link set br0 up  # Bring the bridge up
 
@@ -225,5 +261,3 @@ router isis
 echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
 
 vtysh -c "wr"
-```
-## 4. hosting services in our VI
