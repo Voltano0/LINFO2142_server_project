@@ -12,3 +12,13 @@ iface eth0.261 inet6 static
 
     # Specify eth0 as the underlying physical device for VLAN 261
     vlan-raw-device eth0
+
+# Bridge
+# Automatically start the br0 Bridge interface on boot
+auto br0
+
+# Set br0 to use a dhcp IPv6 address
+iface br0 inet6 dhcp
+
+    # Specify eth0 as the underlying physical device for the bridge
+    bridge_ports eth0 
