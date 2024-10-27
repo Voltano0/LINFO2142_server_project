@@ -1,0 +1,25 @@
+name: rpi1
+topology:
+  nodes:
+    br0:
+      kind: bridge
+      network-mode: none
+
+    r0:
+      kind: host
+      image: frrouting/frr
+      network-mode: none
+    dns1:
+      kind: linux
+      image: alpine
+      network-mode: none
+
+    svcs1:
+      kind: linux
+      image: alpine
+      network-mode: none
+    
+  links:
+    - endpoints: ["r0:upstream", "br0:container"]  # Link between router and bridge
+    - endpoints: ["r0:eth0", "dns1:eth0"]  # Link between router and DNS container
+    - endpoints: ["r0:eth1", "svcs1:eth0"]  # Link from router to service container

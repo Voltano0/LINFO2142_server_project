@@ -1,0 +1,14 @@
+# Automatically start the eth0.261 interface on boot
+auto eth0.261
+
+# Set eth0.261 to use a static IPv6 address
+iface eth0.261 inet6 static
+
+    # IPv6 address for this interface (group 7, device 2)
+    address fc00:2142:ff07::2/64
+
+    # Gateway address for this subnet
+    gateway fc00:2142:ff07::1
+
+    # Specify eth0 as the underlying physical device for VLAN 261
+    vlan-raw-device eth0

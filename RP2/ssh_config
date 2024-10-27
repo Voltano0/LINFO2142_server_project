@@ -1,0 +1,16 @@
+Host rasp
+    HostName fc00:2142:ff07::2          # IP address of RPI
+    User rasp                           # Username used to connect to RPI
+    IdentityFile ~/.ssh/id_ed25519      # Path to the private SSH key
+    ProxyJump gateway                   # Use the SSH gateway as a jump host
+
+Host gateway
+    HostName 130.104.78.202             # IP address of the SSH gateway
+    User rasp                           # Username used to connect to the SSH gateway
+    IdentityFile ~/.ssh/id_ed25519      # Path to the private SSH key
+    ProxyJump UCL
+
+Host UCL
+    HostName studssh.info.ucl.ac.be     # IP address of the UCLouvain gateway
+    User gustint                        # Username used to connect to UCLouvain network
+    IdentityFile ~/.ssh/id_rsa          # Path to the private SSH key
