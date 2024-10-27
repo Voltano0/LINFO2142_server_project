@@ -233,31 +233,24 @@ topology:
 ```
 This configuration defines our topology. 
 > Note: The frrouting/frr image must be downloaded and transferred to the RPI using scp.
+
 After transferring the **.clab.yml** file to the RPI, deploy the configuration with:
 
 In RPI shell :
 ```
 sudo containerlab deploy --topo my-topology.clab.yml
 ```
-## 4. hosting services in our VI
+
+### 4. Issues
+So far, we've tried to enable the configuration on our RPI. We encountered issues with the bridge. We attempted several methods, starting by initializing it manually with:
+```
 sudo brctl addbr br0  # Create the bridge
 sudo ip link set br0 up  # Bring the bridge up
-
-
-
-
-
-
-
-
-sudo docker exec -it <container_id_of_r0> /bin/sh
-
-router isis
-  net fc00:2142:XX:00  # Your specific IPv6 prefix
-  metric 10
-  passive-interface eth0
-  passive-interface eth1
-
-echo 1 > /proc/sys/net/ipv6/conf/all/forwarding
-
-vtysh -c "wr"
+```
+This was unsuccessful. We then attempted to enable it at startup by modifying the interfaces file like:
+```
+auto br0
+iface br0 inet6 dhcp
+        bridge_ports eth0
+```
+However, this configuration change the properties of eth0. After a reboot, we were unable to reconnect via SSH.
