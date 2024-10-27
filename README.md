@@ -140,17 +140,17 @@ sudo ufw enable
 ### Step 4 : protect from DDos attacks 
 Fail2Ban is a tool that automatically bans IP addresses showing signs of abusive behavior. This is why we use it to protect our server from DDos attacks. We use *Fail2Ban* and *rsyslog* for protection against DDoS attacks. Installation followed the same process as described in Step 3.
 
-In RPI shell
+In RPI shell : 
 1. Enable logging :
 ```
 sudo systemctl enable fail2ban.service
 ```
-2. Configure Fail2Ban
-  1. Open config file
+2. Configure Fail2Ban : 
+- Open config file
 ```
 sudo nano /etc/fail2ban/jail.local
 ```
-  2. Add the following :
+- Add the following :
 ```
 [sshd]
 enabled = true
@@ -173,12 +173,35 @@ sudo systemctl restart fail2ban
 With these settings, the Raspberry Pi is better protected.
 
 ## 3. Networking in a virtual infrastructure
+
+In this phase, we’ll deploy a virtual network infrastructure using Infrastructure as Code (IaC) with the containerlab overlay on Docker. This setup enables services in containers and configures the network connecting them.
+
+### Step 1 : building containers
+Since the RPI lacks internet access, we'll need to cross-build Docker containers on our local machine for the RPI’s architecture, wich is *aarch64*.
+To achieve such a goal, we do as follow : 
+
+In computer shell :
+1. Install and enable multi-platform builds with qemu :
 ```
 sudo apt-get install qemu-user-static
 docker run --rm --privileged multiarch/qemu-user-static --reset -p yes
+```
+2. Cross build the container named "my-container"
+```
 docker buildx create --use
-
-
+docker buildx build --platform linux/arm64 -t my-container .
+```
+3. Save the container as tar archive
+```
+docker save my-container > my-container.tar
+```
+Once it is achieved, we *scp* the tar achive into our RPI. We simply load it after.
+ 
+In RPI shell : 
+```
+docker load < my-container.tar
+```
+```
 sudo containerlab deploy --topo my-topology.clab.yml
 
 sudo brctl addbr br0  # Create the bridge
