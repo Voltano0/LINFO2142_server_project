@@ -128,20 +128,6 @@ We can see that the path taken by the hosts H1 to H3 has changed. The hosts now 
 ### Task 1.3: Interpreting the results and possible use cases
 The results clearly demonstrate how modifying the Local Preference (LP) attribute influences the path selection within an AS. By increasing the LP value to 200 on S2, traffic from H1 to H2 and H3 now consistently prefers the `S2->S6` path, as opposed to the alternative lower-preference routes.
 
-#### Interpretation of the results
-
-The Local Preference attribute serves as a mechanism to enforce traffic flow policies. Key observations from the results include:
-
-- **Traffic Engineering**: By manipulating the LP attribute, network operators can influence the path that traffic takes within an AS. This can be useful for load balancing, optimizing network performance, and ensuring efficient resource utilization.
-
-- **Path Selection**: The LP attribute allows network operators to define preferred paths for traffic within an AS. By assigning higher LP values to specific routes, operators can ensure that traffic takes the desired path.
-
-- **Policy Enforcement**: The LP attribute can be used to enforce traffic flow policies within an AS. By setting LP values based on specific criteria, operators can control how traffic is routed through the network.
-
-- **Path Redundancy**: LP values can be used to create path redundancy within an AS. By assigning different LP values to multiple paths, operators can ensure that traffic is distributed across redundant links.
-
-- **Traffic backup**: By setting LP values, network operators can define backup paths for traffic in case of link failures or congestion. This ensures that traffic can be rerouted through optimal alternate paths when needed.
-
 ## Task 2: MED
 The Multi-Exit Discriminator (MED) attribute is a tool used in BGP to influence the choice of entry points into an AS when a neighboring AS has multiple routes to choose from. Unlike Local Preference, which operates within an AS, MED is used between neighboring AS's to signal the preferred route from the perspective of the advertising AS. The lower the MED value, the more preferred the route.
 
@@ -161,10 +147,8 @@ To effectively test the MED attribute and observe its behavior in real scenarios
     - Advertise the same route with a MED of 200 at the other peering point (e.g., S3-S7).
     - Test how traffic from AS65002 chooses its path into AS65001 based on the MED values.
 
-## Task 3: Communities
-
-
-## Task 4: AS Path
+## Task 3 & 4
+For the following attributes, Communities and AS Path, we have understood their behavior and meaning. However, similar to MED, our topology is too simple to effectively use these attributes. Their application would have no significant impact or would resemble the configuration from **Task 1**.
 
 ## Summary of the 4 attributes
 
@@ -187,10 +171,6 @@ MED, Local Preference, AS Path can be used to influence the path. Each one has i
 
 - **Policy-Based Routing**: LP values can be used to enforce specific routing policies based on traffic type, source, destination, or other criteria. For example, traffic from specific subnets or services can be directed through specific routers based on LP values.
 
-## Limitations
-
-- **MED** : The MED attribute is only considered when selecting between routes that have the same AS Path length. If there are no such routes, the MED attribute is not evaluated, and other BGP decision factors take precedence.
-- **Communities** : 
-- **AS Path**:
 
 ## Conclusion
+
