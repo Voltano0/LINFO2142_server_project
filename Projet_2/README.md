@@ -1,7 +1,7 @@
 # LINFO2142 - Traffic Engineering Using BGP Attributes
 ## Authors 
 - **Jacques Hogge** - 26432000
-- **Théo Gustin** - ????????
+- **Théo Gustin** - 42052000
 
 ## Introduction
 BGP Traffic Engineering (BGP-TE) is used to better control the flow of traffic within an Autonomous System (AS) or between AS's. BGP (Border Gateway Protocol) is a protocol used to exchange routing information across the Internet, and it also allows network operators to influence the path that traffic takes to reach its destination.
