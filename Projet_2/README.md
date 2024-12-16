@@ -174,3 +174,46 @@ MED, Local Preference, AS Path can be used to influence the path. Each one has i
 
 ## Conclusion
 
+Here’s an IPv6 address allocation scheme for your eBGP network, using the prefix `fc00:2143::/48` and embedding switch numbers in the addresses:
+
+### Addressing Scheme Logic:
+- Format: `fc00:2143:<LinkID>::<SwitchID>`
+- `LinkID`: A unique identifier for each link.
+- `SwitchID`: The switch number based on your provided topology.
+
+---
+
+
+1. **Link S2-S6**  
+   - S2: `fc00:2143:1::2`
+   - S6: `fc00:2143:1::6`
+
+2. **Link S4-S11**  
+   - S4: `fc00:2143:2::4`
+   - S11: `fc00:2143:2::11`
+
+3. **Link S3-S8**  
+   - S3: `fc00:2143:3::3`
+   - S8: `fc00:2143:3::8`
+
+4. **Link S3-S12**  
+   - S3: `fc00:2143:4::3`
+   - S12: `fc00:2143:4::12`
+
+5. **Link S7-S8**  
+   - S7: `fc00:2143:5::7`
+   - S8: `fc00:2143:5::8`
+
+6. **Link S7-S12**  
+   - S7: `fc00:2143:6::7`
+   - S12: `fc00:2143:6::12`
+
+7. **Link S7-S13**  
+   - S7: `fc00:2143:7::7`
+   - S13: `fc00:2143:7::13`
+
+8. **Link S12-S8**  
+   - S12: `fc00:2143:8::12`
+   - S8: `fc00:2143:8::8`
+
+
