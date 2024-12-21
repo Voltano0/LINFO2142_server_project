@@ -652,7 +652,7 @@ traceroute to fc00:2142:4::15 (fc00:2142:4::15), 30 hops max, 72 byte packets
  6  fc00:2142:4::11 (fc00:2142:4::11)  0.013 ms  0.014 ms  0.008 ms #S11
  7  fc00:2142:4::15 (fc00:2142:4::15)  0.006 ms  0.013 ms  0.011 ms #S11 -> H4
 ```
-As shown, the path taken goes through `AS65001` and not via `S7`, as expected.  
+As shown, the path taken goes through `AS65001` and not via `S7`, as expected. This can be a bit weird to configure such a thing but we can imagine a real case scenario. Let's imagine AS4 is a country with strict laws applications. To obtain its prefix, we must go though a lot of procedure and we are require to not 
 
 ### Crash simulation 
 
@@ -749,4 +749,5 @@ traceroute to fc00:2142:1::15 (fc00:2142:1::15), 30 hops max, 72 byte packets
 ```
 Here is an animation to see what's occur : 
 ![animation](/ezgif.com-added-text.gif)
+
 # Conclusion
