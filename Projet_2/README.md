@@ -42,24 +42,24 @@ In each AS, the ISIS routing protocol is used to exchange routing information be
 
 The paths used by the hosts (`H1, H2, H3,H3`) in the initial configuration are (You can run the commande `traceroute fc00:2142:<AS>::15` with AS = {1,2,3,4}):
 
-|    	|              H1             	|           H2           	|              H3               | H4                        |
-|:--:	|:---------------------------:	|:----------------------:	|:-----------------------------:|:-:                        |
-| H1 	|              /              	|  H1->S1->S2->S6->S5-H2    | H1->S1->S4->S3->S8->S10->H3   |   H1->S1->S4->S11->H4     |
-| H2 	|  H2->S5->S6->S2-S1->H1        |            /           	|   H2->S5->S7->S8->S10->H3     |   H2->S5->S7-S13->S11->H3 *|
-| H3 	|  H3->S10->S8->S3->S4->S1->H1  | H3->S10->S8->S7->S5->H2   |              /            	|H3->S10->S8->S12->S11->H4   |
-| H4    |  H4->S11->S4->S1->H1          | H4->S11->S12->S7->S5->H2  | H4-S11->S12->S8->S10->H3      |/                          |
+|    	|              H1             	|           H2           	|              H3               | H4                         |
+|:--:	|:---------------------------:	|:----------------------:	|:-----------------------------:|:-:                         |
+| H1 	|              /              	|  H1->S1->S2->S6->S5-H2  | H1->S1->S4->S3->S8->S10->H3   |   H1->S1->S4->S11->H4      |
+| H2 	|  H2->S5->S6->S2-S1->H1        |            /           	|   H2->S5->S7->S8->S10->H3     |   H2->S5->S7-S13->S11->H4 *|
+| H3 	|  H3->S10->S8->S3->S4->S1->H1  | H3->S10->S8->S7->S5->H2 |              /            	  |H3->S10->S8->S12->S11->H4   |
+| H4  |  H4->S11->S4->S1->H1        | H4->S11->S12->S7->S5->H2  | H4-S11->S12->S8->S10->H3      |/                           |
 
-*<em>The path from H2 to H3 have a equal cost path, so the path can be `H2->S5->S7->S12->S11->H3`
- or `H2->S5->S7->S13->S11->H3`. When using the command `traceroute fc00:2142:3::15` we can see that the path is `H2->S5->S7->S13->S11->H3`. We talk about this in the section [Task 2.2](#task-22-scenario-1--). But it just to avoid `S12` to have a lot of traffic, we set a MED value lower than the MED value of `S12` on `S13` to force the traffic to go through S13</em>.
+*<em>The path from H2 to H4 have a equal cost path, so the path can be `H2->S5->S7->S12->S11->H4`
+ or `H2->S5->S7->S13->S11->H4`. When using the command `traceroute fc00:2142:3::15` we can see that the path is `H2->S5->S7->S13->S11->H3`. We talk about this in the section [Task 2.2](#task-22-scenario-1--). But it just to avoid `S12` to have a lot of traffic, we set a MED value lower than the MED value of `S12` on `S13` to force the traffic to go through S13</em>.
 
 For a visual représentation here is a diagram with the different init routes :
 
 ![Initial Routes](images/InitialRoutes.png) 
 
-We can see that the hosts are taking different paths to reach their destination. Always the shortest path is taken by the hosts. We can also see some routes between some AS are never used (e.g S6-S7, S8-S9, S12-13, S9-S10).
-Also, S9 never forward packet, this is due to the topology of the network.
+We can see that the hosts are taking different paths to reach their destination. Always the shortest path is taken by the hosts. We can also see some routes between some AS are never used (e.g `S6-S7`, `S8-S9`, `S12-13`, `S9-S10`).
+Also, `S9` never forward packet, this is due to the topology of the network.
 
-### Choice of the best route
+### BGP Decision Process
 It's important to note that, in BGP, the best route is chosen based on the following criteria (in order of priority) :
 |order|Criteria|Description|
 |:---:|:---:|:---:|
@@ -100,8 +100,8 @@ Below is the detailed breakdown of the full IP range:
 | fc00:2142:1::1    | fc00:2142:2::5    | fc00:2142:3::8    | fc00:2142:4::11   |
 | fc00:2142:1::2    | fc00:2142:2::6    | fc00:2142:3::9    | fc00:2142:4::12   |
 | fc00:2142:1::3    | fc00:2142:2::7    | fc00:2142:3::10   | fc00:2142:4::13   |
-| fc00:2142:1::4    | /  | /  | /|
-| fc00:2142:1::15   | fc00:2142:2::15|fc00:2142:3::15 | fc00:2142:4::15 |
+| fc00:2142:1::4    | fc00:2142:2::15   | fc00:2142:3::15   | fc00:2142:4::15   |
+| fc00:2142:1::15   | /                 | /                 | /                 |
 
 ### 2. **fc00:2143:A::B**
 This range is used exclusively for eBGP. 
@@ -109,7 +109,8 @@ This range is used exclusively for eBGP.
 - **B** represents the switch number.
 
 The link number is chosen according to the schema below:
-![My Diagram](/link_numbers.jpg)
+![My Diagram](images/link_numbers.jpg)
+
 
 ## Task 1: Local Preference
 The Local Preference (LP or LOCAL_PREF) attribute is used to influence the outbound from a local AS. It is used to determine the preferred exit point from an AS when there are multiple exit points. The higher the Local Preference value, the more preferred the route. The default value for Local Preference is 100. It's important to note that Local Preference is only used within an AS using iBGP and is not propagated to other AS's. If a AS receive a LOCAL_PREF from a other AS it must ignore it.
@@ -118,7 +119,7 @@ The Local Preference (LP or LOCAL_PREF) attribute is used to influence the outbo
 In the default configuration, the LP value is set to 100 on all routers. The paths used by the hosts in the default configuration are shown in the table above in section [Configuration](#configuration).
 
 ### Task 1.2:  Scenario 1 : Going through a specific AS
-In this scenario, we wanted to force traffic to go through a specific AS. It can be for security reasons or to use a specific service provided by the AS, or to avoid a other AS. In this case, we wanted to force traffic from `H1` to `AS65002` to go through `AS65003` before.
+In this scenario, we wanted to force traffic to go through a specific AS. It can be for security reasons or to use a specific service provided by the AS, or to avoid a other AS. In this case, we wanted to force traffic from `H1` to `AS65003` to go through `AS65002` before.
 
 In our case the init path used by `AS65001` to `AS65003` is listed in the table in the section [Configuration](#configuration). 
 Or listed below via the route-table
@@ -177,7 +178,7 @@ S2: show ip bgp ipv6 unicast
  *>  fc00:2142:4::/64      fe80::a8c1:abff:fe1e:4606               200      0 65002 65004 i
 
 ```
-We this table we see that all path are going through `AS65002` via router `S2`.
+With this table we see that all path are going through `AS65002` via router `S2`.
 Or we can see the new path taken by the hosts by using the command `traceroute` :
 
 ```bash
@@ -196,15 +197,15 @@ With these commands, we can see that the traffic is now going through `AS65002` 
 
 But by applying the local preference on the router `S2`, we force all the traffic going through this router to go through `AS65002`. For example, the traffic from `H1` to `H4` is also going through `AS65002` (test with this command in H1 : `traceroute fc00:2142:4::15`). 
 ```bash
-h1:/ traceroute fc00:2142:3::15 # H1 -> H3
-traceroute to fc00:2142:3::15 (fc00:2142:3::15), 30 hops max, 72 byte packets # H1
- 1  fc00:2142:1::11 (fc00:2142:1::11)  0.018 ms  0.018 ms  0.028 ms # S1
- 2  fc00:2142:1::2 (fc00:2142:1::2)  0.177 ms  0.027 ms  0.021 ms # S2
- 3  fc00:2143:1::6 (fc00:2143:1::6)  0.010 ms  0.019 ms  0.011 ms # S6
- 4  fc00:2142:2::7 (fc00:2142:2::7)  0.008 ms  0.021 ms  0.014 ms # S7
- 5  fc00:2143:5::8 (fc00:2143:5::8)  0.011 ms  0.018 ms  0.011 ms # S8
- 6  fc00:2142:3::10 (fc00:2142:3::10)  0.009 ms  0.023 ms  0.014 ms # S10
- 7  fc00:2142:3::15 (fc00:2142:3::15)  0.008 ms  0.018 ms  0.015 ms # H3
+h1:/ traceroute fc00:2142:4::15 # H1 -> H4
+traceroute to fc00:2142:4::15 (fc00:2142:4::15), 30 hops max, 72 byte packets
+ 1  fc00:2142:1::11 (fc00:2142:1::11)  0.017 ms  0.019 ms  0.012 ms # S1
+ 2  fc00:2142:1::2 (fc00:2142:1::2)  0.009 ms  0.018 ms  0.013 ms # S2
+ 3  fc00:2143:1::6 (fc00:2143:1::6)  0.015 ms  0.018 ms  0.010 ms # S6
+ 4  fc00:2142:2::7 (fc00:2142:2::7)  0.008 ms  0.024 ms  0.014 ms # S7
+ 5  fc00:2143:7::13 (fc00:2143:7::13)  0.017 ms  0.018 ms  0.013 ms # S13
+ 6  fc00:2142:4::11 (fc00:2142:4::11)  0.012 ms  0.019 ms  0.016 ms # S11
+ 7  fc00:2142:4::15 (fc00:2142:4::15)  0.044 ms  0.019 ms  0.014 ms # H4
 ```
 
 
@@ -226,7 +227,7 @@ router bgp 65001
  exit-address-family
 exit
 ```
-Note that it works only because the path `AS65001->AS65002` is shorter than the path `AS65001->AS65003->AS65004`. Also by setting the local preference on `S3` will overdrive the desire to use AS65002 via LOCAL_PREF setup at router `S2`. This is due to the BGP choice of the best route talked in the section [Choice of the best route](#choice-of-the-best-route).
+Note that it works only because the path `AS65001->AS65002` is shorter than the path `AS65001->AS65003->AS65004`. Also by setting the local preference on `S3` will overdrive the desire to use `AS65002` via LOCAL_PREF setup at router `S2`. This is due to the BGP choice of the best route talked in the section [Choice of the best route](#bgp-decision-process).
 
 Here is a proof that the traffic from H1 to H4 is now going directly through AS65003 :
 
@@ -262,7 +263,7 @@ S8:/ show ip bgp ipv6 unicast
  * i                     fc00:2142:1::2                   200      0 65002 65003 i
  *>  fc00:2142:4::/64    fe80::a8c1:abff:fecf:218    0    200      0 65004 i
 ```
-We can also setup a Local-pref of 150 on the router `S4` for example. All trafic is goind out by the router `S2` but in case of failure of the link `S2->S6`. This will force the traffic to go through `AS65004` by `S4->S11` and keep the avoiding the traffic to go directly to `AS65003` by `S3->S8`. See the scenario 2 in the section [Task 1.3](#task-13-scenario-2-backup-path-in-case-of-failure) for more details.
+We can also setup a Local-pref of 150 on the router `S4` for example. All trafic is goind out by the router `S2` but in case of failure of the link `S2->S6`. This will force the traffic to go through `AS65004` by `S4->S11` and keep avoiding the traffic to go directly to `AS65003` by `S3->S8`. See the scenario 2 in the section [Task 1.3](#task-13-scenario-2-backup-path-in-case-of-failure) for more details.
 
 ### Task 1.3: Scenario 2: Backup path in case of failure
 In this scenario, we wanted to set up a backup path in case of failure of the main path. For example, we want to setup the link `AS65003->AS65002->AS65001->AS65004` as a backup link of the link `AS65003->65004` (We can pass by `AS65001` without `AS65002` but we force for some reasons). For example The main link `S8->S12` fail and we know that the links `S7->S12` and `S7->S13` is under maintenance with a lot of congestion or latency and we want to pass by `AS65002` before going to `AS65004` cause of some reasons. We can setup the router `S8` with a local preference lower than the local pref of `S8-S12` but higher than the normal(100), and then setup the router `S6` with a local preference higher than the préférence of `S7->S12` and `S7->S13`.
@@ -563,6 +564,46 @@ traceroute to fc00:2142:4::15 (fc00:2142:4::15), 30 hops max, 72 byte packets # 
  5  fc00:2142:4::15 (fc00:2142:4::15)  0.014 ms  0.027 ms  0.011 ms # H4
 ```
 
+A other possible scenario is when the link with `S13` are all down (`S13-S11` and `S13-S12`), Afer cutting them down with the command `shutdown` in the configuration of the router `S13` :
+  
+  ```bash
+  S13 :/ conf t
+  s13 (config) :/ interface eth-s11
+  s13 (config-if) :/ shutdown
+  s13 (config-if) :/ exit
+  s13 (config) :/ interface eth-s12
+  s13 (config-if) :/ shutdown
+  ```
+
+  after convergence of the network, we can see that the traffic is now going through the link `S7->S12` as a backup path:
+
+  ```bash
+  S7/ show ip bgp ipv6 unicast
+       Network               Next Hop                        Metric LocPrf Weight Path
+ *>i fc00:2142:1::/64        fc00:2142:2::6                       0    100      0 65001 i
+ *                           fe80::a8c1:abff:fea8:7860                                    0 65003 65001 i
+ *                           fe80::a8c1:abff:fec1:6234           50             0 65004 65001 i
+ *>  fc00:2142:2::/64        ::                                   0         32768 i
+ * i                         fc00:2142:2::5                       0    100      0 i
+ * i                         fc00:2142:2::6                       0    100      0 i
+ *>  fc00:2142:3::/64        fe80::a8c1:abff:fea8:7860            0             0 65003 i
+ *                           fe80::a8c1:abff:fec1:6234           50             0 65004 65003 i
+ *>  fc00:2142:4::/64        fe80::a8c1:abff:fec1:6234           50             0 65004 i
+ *                           fe80::a8c1:abff:fea8:7860                          0 65003 65004 i
+ ```
+
+ ```bash
+ h2:/ traceroute fc00:2142:4::15 # H2 -> H4
+traceroute to fc00:2142:4::15 (fc00:2142:4::15), 30 hops max, 72 byte packets #H2
+ 1  fc00:2142:2::11 (fc00:2142:2::11)  0.019 ms  0.018 ms  0.072 ms # S5
+ 2  fc00:2142:2::7 (fc00:2142:2::7)  0.010 ms  0.027 ms  0.011 ms # S7
+ 3  fc00:2143:6::12 (fc00:2143:6::12)  0.014 ms  0.017 ms  0.012 ms # S12
+ 4  fc00:2142:4::11 (fc00:2142:4::11)  0.009 ms  0.018 ms  0.014 ms # S11
+ 5  fc00:2142:4::15 (fc00:2142:4::15)  0.009 ms  0.007 ms  0.003 ms # H4
+ ```
+
+ As soon as a link with router `S13` is re-established (`S11-S13` or `S11-S12` or both) the route is announced again and the traffic from `S7` passes through `S13`.
+
 ## Task 3 : Communities
 
 BGP communities are **tags** used in BGP routing to group routes. We can then apply specific routing policies to specific tags. The tags follow the `AS:value` format. There are also **well-known communities** that can be invoked by their names:
@@ -748,6 +789,5 @@ traceroute to fc00:2142:1::15 (fc00:2142:1::15), 30 hops max, 72 byte packets
  4  fc00:2142:1::15 (fc00:2142:1::15)  0.005 ms  0.031 ms  0.011 ms #S1 -> H1
 ```
 Here is an animation to see what's occur : 
-![animation](/ezgif.com-added-text.gif)
-
+![animation](images/ezgif.com-added-text.gif)
 # Conclusion
