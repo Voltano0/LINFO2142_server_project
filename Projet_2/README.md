@@ -81,10 +81,35 @@ To run the scripts, you can use the following command :
 sudo bash ./<script_name>.sh
 ```
 
-## Task 0: ISIS and BGP Configuration
+## Task 0: Initial and IP's configuration
 The first task was to configure ISIS and BGP on the routers. The configuration files for each router can be found in the [clab-igp folder](/clab-igp/).
 
 We decided not to use a Route Reflector in this project since there are a maximum of 4 routers in each AS. Instead, we opted for a full mesh of iBGP sessions between the routers in the same AS, and eBGP sessions between routers in different ASes. See the topology diagram above.
+
+To work with a topology, it is important to choose an appropriate IP range. We can divide our IPv6 addresses into two categories:
+
+### 1. **fc00:2142:X::Y**
+This range is used for IS-IS and iBGP configuration. 
+- **X** represents the AS number (1, 2, 3, 4).
+- **Y** represents the switch number. Y can also be equal to 15 to represent the host. 
+
+Below is the detailed breakdown of the full IP range:
+
+| AS1               | AS2               | AS3               | AS4               |
+|:------------------:|:-----------------:|:-----------------:|:-----------------:|
+| fc00:2142:1::1    | fc00:2142:2::5    | fc00:2142:3::8    | fc00:2142:4::11   |
+| fc00:2142:1::2    | fc00:2142:2::6    | fc00:2142:3::9    | fc00:2142:4::12   |
+| fc00:2142:1::3    | fc00:2142:2::7    | fc00:2142:3::10   | fc00:2142:4::13   |
+| fc00:2142:1::4    | fc00:2142:2::15   | fc00:2142:3::15   | fc00:2142:4::15   |
+| fc00:2142:1::15   | /                 | /                 | /                 |
+
+### 2. **fc00:2143:A::B**
+This range is used exclusively for eBGP. 
+- **A** represents the link number.
+- **B** represents the switch number.
+
+The link number is chosen according to the schema below:
+![My Diagram](/link_numbers.jpg)
 
 ## Task 1: Local Preference
 The Local Preference (LP or LOCAL_PREF) attribute is used to influence the outbound from a local AS. It is used to determine the preferred exit point from an AS when there are multiple exit points. The higher the Local Preference value, the more preferred the route. The default value for Local Preference is 100. It's important to note that Local Preference is only used within an AS using iBGP and is not propagated to other AS's. If a AS receive a LOCAL_PREF from a other AS it must ignore it.
