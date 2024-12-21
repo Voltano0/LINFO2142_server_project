@@ -748,5 +748,5 @@ traceroute to fc00:2142:1::15 (fc00:2142:1::15), 30 hops max, 72 byte packets
  4  fc00:2142:1::15 (fc00:2142:1::15)  0.005 ms  0.031 ms  0.011 ms #S1 -> H1
 ```
 Here is an animation to see what's occur : 
-![animation](/ezgif.com-animated-gif-maker.gif)
+![animation](/ezgif.com-added-text.gif)
 # Conclusion
