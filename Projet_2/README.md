@@ -790,3 +790,4 @@ traceroute to fc00:2142:1::15 (fc00:2142:1::15), 30 hops max, 72 byte packets
 Here is an animation what we did : 
 ![animation](/Projet_2/Gif_ASP.gif)
 # Conclusion
+In conclusion, in this project, we successfully demonstrated how traffic engineering can be achieved using specific BGP attributes. We showcased the use of local preference, Multi-Exit Discriminator (MED), communities, and AS Path to redirect routes, establish backup paths during shutdowns, regain access to specific switches, and more. Mastery of BGP and its various features is essential for future network engineers, as it is the core protocol of the Internet. 
