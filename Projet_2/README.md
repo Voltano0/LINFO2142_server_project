@@ -724,7 +724,7 @@ In our case, we are using **AS Path Prepending**, which means **intentionally ma
 
 ### Simple case
 
-In our simple case, we are going to make the link `S4 -> S11` appear **much longer** by using AS Path Prepending. This will cause BGP to avoid this link when routing traffic. As a result, a ping from `H4 -> H1` **will not go through that link anymore.** Let's look in `S4`:
+In our simple case, we are going to make the link `S4 -> S11` appear **much longer** by using AS Path Prepending. This will cause BGP to avoid this link when routing traffic.  As a result, a ping from `H4 -> H1` **will not go through that link anymore.** In real world, we can imagine that this link cost more money when we use it, that's why we prefer other route. However if the new path taken cost too much, we can go via link `S4 -> S11` as usual. Let's look in `S4`:
 ```bash
 ...
   neighbor fc00:2143:2::11 activate
@@ -765,13 +765,13 @@ Since AS Path is the same, BGP will decide with other attributes. Let's see wich
 ```bash
 h4:/ traceroute fc00:2142:1::15 # H4 -> H1
 traceroute to fc00:2142:1::15 (fc00:2142:1::15), 30 hops max, 72 byte packets
- 1  fc00:2142:4::14 (fc00:2142:4::14)  0.009 ms  0.017 ms  0.015 ms #S11
- 2  fc00:2142:4::12 (fc00:2142:4::12)  0.006 ms  0.023 ms  0.021 ms #S12
- 3  fc00:2143:8::8 (fc00:2143:8::8)  0.008 ms  0.030 ms  0.033 ms #S8
- 4  fc00:2143:3::3 (fc00:2143:3::3)  0.008 ms  0.016 ms  0.031 ms #S3
- 5  fc00:2142:1::2 (fc00:2142:1::2)  0.016 ms  0.017 ms  0.016 ms #S2
- 6  fc00:2142:1::1 (fc00:2142:1::1)  0.007 ms  0.010 ms  0.005 ms #S1
- 7  fc00:2142:1::15 (fc00:2142:1::15)  0.004 ms  0.022 ms  0.006 ms #S1 -> H1
+ 1  fc00:2142:4::14 (fc00:2142:4::14)  0.010 ms  0.018 ms  0.029 ms #S11
+ 2  fc00:2142:4::13 (fc00:2142:4::13)  0.019 ms  0.026 ms  0.009 ms #S13
+ 3  fc00:2143:7::7 (fc00:2143:7::7)  0.008 ms  0.019 ms  0.013 ms #S7
+ 4  fc00:2142:2::6 (fc00:2142:2::6)  0.009 ms  0.018 ms  0.012 ms #S6
+ 5  fc00:2143:1::2 (fc00:2143:1::2)  0.008 ms  0.018 ms  0.012 ms #S2
+ 6  fc00:2142:1::1 (fc00:2142:1::1)  0.009 ms  0.018 ms  0.012 ms #S1
+ 7  fc00:2142:1::15 (fc00:2142:1::15)  0.009 ms  0.017 ms  0.010 ms #S1 -> H1
  ```
 - Now if we shutdown links : `S12-S3` `S12-S7` `S13-S7` `S8-S3`. There will be only two route from H4 to H1 : 
   - via `S4-S11`: AS65004 - AS65001 - AS65001
