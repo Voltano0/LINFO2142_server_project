@@ -35,19 +35,19 @@ sudo containerlab destroy
 ## Network Topology
 The network topology used consists of 4 AS (`AS65001, AS65002, AS65003, AS65004)` and some routers in each AS as shown in the figure below.
 
-![Network Topology](images/PossibleTopo.png)
+![Network Topology](images/NetworkTopology.png)
 
 ## Configuration
 In each AS, the ISIS routing protocol is used to exchange routing information between routers. iBGP sessions are established between routers in the same AS, and eBGP sessions are established between routers in different AS's. The configuration files for each router can be found in the [clab-igp folder](/clab-igp/).
 
-The paths used by the hosts (`H1, H2, H3,H3`) in the initial configuration are (You can run the commande `traceroute fc00:2142:<AS>::15` with AS = {1,2,3,4}):
+The paths used by the hosts (`H1,H2,H3,H4`) in the initial configuration are (You can run the commande `traceroute fc00:2142:<AS>::15` with AS = {1,2,3,4}):
 
-|    	|              H1             	|           H2           	|              H3               | H4                         |
-|:--:	|:---------------------------:	|:----------------------:	|:-----------------------------:|:-:                         |
-| H1 	|              /              	|  H1->S1->S2->S6->S5-H2  | H1->S1->S4->S3->S8->S10->H3   |   H1->S1->S4->S11->H4      |
-| H2 	|  H2->S5->S6->S2-S1->H1        |            /           	|   H2->S5->S7->S8->S10->H3     |   H2->S5->S7-S13->S11->H4 *|
-| H3 	|  H3->S10->S8->S3->S4->S1->H1  | H3->S10->S8->S7->S5->H2 |              /            	  |H3->S10->S8->S12->S11->H4   |
-| H4  |  H4->S11->S4->S1->H1        | H4->S11->S12->S7->S5->H2  | H4-S11->S12->S8->S10->H3      |/                           |
+|    	|              H1             |           H2           	|              H3               | H4                         |
+|:--:	|:---------------------------:|:----------------------:	|:-----------------------------:|:-:                         |
+| H1 	|              /              |  H1->S1->S2->S6->S5->H2 | H1->S1->S4->S3->S8->S10->H3   |   H1->S1->S4->S11->H4      |
+| H2 	|  H2->S5->S6->S2->S1->H1     |            /           	|   H2->S5->S7->S8->S10->H3     |   H2->S5->S7-S13->S11->H4 *|
+| H3 	|  H3->S10->S8->S3->S4->S1->H1| H3->S10->S8->S7->S5->H2 |              /            	  |H3->S10->S8->S12->S11->H4   |
+| H4  |  H4->S11->S4->S1->H1        | H4->S11->S12->S7->S5->H2| H4->S11->S12->S8->S10->H3     |/                           |
 
 *<em>The path from H2 to H4 have a equal cost path, so the path can be `H2->S5->S7->S12->S11->H4`
  or `H2->S5->S7->S13->S11->H4`. When using the command `traceroute fc00:2142:3::15` we can see that the path is `H2->S5->S7->S13->S11->H3`. We talk about this in the section [Task 2.2](#task-22-scenario-1--). But it just to avoid `S12` to have a lot of traffic, we set a MED value lower than the MED value of `S12` on `S13` to force the traffic to go through S13</em>.
@@ -96,12 +96,12 @@ This range is used for IS-IS and iBGP configuration.
 Below is the detailed breakdown of the full IP range:
 
 | AS1               | AS2               | AS3               | AS4               |
-|:------------------:|:-----------------:|:-----------------:|:-----------------:|
+|:-----------------:|:-----------------:|:-----------------:|:-----------------:|
 | fc00:2142:1::1    | fc00:2142:2::5    | fc00:2142:3::8    | fc00:2142:4::11   |
 | fc00:2142:1::2    | fc00:2142:2::6    | fc00:2142:3::9    | fc00:2142:4::12   |
 | fc00:2142:1::3    | fc00:2142:2::7    | fc00:2142:3::10   | fc00:2142:4::13   |
-| fc00:2142:1::4    | fc00:2142:2::15   | fc00:2142:3::15   | fc00:2142:4::15   |
-| fc00:2142:1::15   | /                 | /                 | /                 |
+| fc00:2142:1::4    |   /               | /                 | /                 |
+| fc00:2142:1::15   | fc00:2142:2::15   | fc00:2142:3::15   | fc00:2142:4::15   |
 
 ### 2. **fc00:2143:A::B**
 This range is used exclusively for eBGP. 
@@ -162,8 +162,8 @@ router bgp 65001
  exit-address-family
 exit
 ```
-We set a route-map `SET-LOCAL-PREF` with a local preference of 200. We apply this route-map to the neighbor `fc00:2143:1::6` in the direction `in`. This will force the traffic from `AS65001` to `AS65002` to go through `AS65003` before going to `AS65002`.
-After this configuration and convergence of the networkd , We can see the new path taken by the hosts. We can see the routing table of the router `S2` :
+We set a route-map `SET-LOCAL-PREF` with a local preference of 200. We apply this route-map to the neighbor `fc00:2143:1::6` in the direction `in`. This will force the traffic from `AS65001` to go through `AS65002` before going to `AS65003`.
+After this configuration and convergence of the network, we can see the new path taken by the hosts. We can see the routing table of the router `S2` :
 
 ```bash
 S2: show ip bgp ipv6 unicast
@@ -208,7 +208,7 @@ traceroute to fc00:2142:4::15 (fc00:2142:4::15), 30 hops max, 72 byte packets
 
 To avoid this, we can apply the same local preference on the router `S4`.
 
-In S4 :
+In `S4` :
 ```bash
 route-map SET-LOCAL-PREF permit 10
  set local-preference 200
@@ -262,7 +262,7 @@ S8:/ show ip bgp ipv6 unicast
 ```
 We can also setup a Local-pref of 150 on the router `S4` for example. All trafic is goind out by the router `S2` but in case of failure of the link `S2->S6`. This will force the traffic to go through `AS65004` by `S4->S11` and keep avoiding the traffic to go directly to `AS65003` by `S3->S8`. See the scenario 2 in the section [Task 1.3](#task-13-scenario-2-backup-path-in-case-of-failure) for more details. 
 Here is an animation what we did : 
-![d](/Projet_2/Gif_LP1.gif)
+![d](/images/Gif_LP1.gif)
 ### Scenario 2: Backup path in case of failure
 In this scenario, we wanted to set up a backup path in case of failure of the main path. For example, we want to setup the link `AS65003->AS65002->AS65001->AS65004` as a backup link of the link `AS65003->65004` (We can pass by `AS65001` without `AS65002` but we force for some reasons). For example The main link `S8->S12` fail and we know that the links `S7->S12` and `S7->S13` is under maintenance with a lot of congestion or latency and we want to pass by `AS65002` before going to `AS65004` cause of some reasons. We can setup the router `S8` with a local preference lower than the local pref of `S8-S12` but higher than the normal(100), and then setup the router `S6` with a local preference higher than the préférence of `S7->S12` and `S7->S13`.
 
@@ -430,7 +430,7 @@ traceroute to fc00:2142:4::15 (fc00:2142:4::15), 30 hops max, 72 byte packets #H
 
 If The link `S7-S12` or `S7-S13` is not under maintenance anymore, we can restore the normal path by removing the local preference on the router `S6`.
 Here is an animation what we did : 
-![€EE](/Projet_2/Gif_LP2.gif)
+![€EE](/images/Gif_LP2.gif)
 ### Load Balancing
 We can also use the Local Preference attribute to perform load balancing between multiple paths. For example, we can set the Local Preference value to 200 on one path and 200 on the other path. This will cause the traffic to be distributed between the two paths based on the Local Preference values. But to acheive this we need two paths with the same AS Path length and our BGP session need to be configured to allow multiple paths. Which is a little out of the scope of our project
 
@@ -440,7 +440,7 @@ The Multi-Exit Discriminator (MED) attribute is used to influence the inbound tr
 ### Influence inbound traffic
 In this scenario we have the router `S7` that have 2 connection in the same AS (`S7->S12` and `S7->S13`) and we want to force the traffic to enter via the router `S13` (the less used router). To do this we can setup the router `S13` with a MED value lower than the MED value of the router `S12`.
 
-Here is a implementation of this scenario (see folder [Configs/Task2/Senario 1](/Configs/Task2/Scenario%201/)):
+Here is a implementation of this scenario:
 in `S12`:
 ```bash
 !
@@ -600,7 +600,7 @@ traceroute to fc00:2142:4::15 (fc00:2142:4::15), 30 hops max, 72 byte packets #H
 
  As soon as a link with router `S13` is re-established (`S11-S13` or `S11-S12` or both) the route is announced again and the traffic from `S7` passes through `S13`.
  Here is an animation what we did : 
- ![@e](/Projet_2/Gif_MED.gif)
+ ![@e](/images/Gif_MED.gif)
 
 ## Task 3 : Communities
 
@@ -711,7 +711,7 @@ Routing entry for fc00:2142:4::/64
   * fe80::a8c1:abff:fef4:2115, via eth-s13, weight 1
 ```
 Here is an animation what we did : 
-![ani](/Projet_2/Gif_community.gif)
+![ani](/images/Gif_community.gif)
 
 ## Task 4 : AS Path
 
@@ -788,6 +788,8 @@ traceroute to fc00:2142:1::15 (fc00:2142:1::15), 30 hops max, 72 byte packets
  4  fc00:2142:1::15 (fc00:2142:1::15)  0.005 ms  0.031 ms  0.011 ms #S1 -> H1
 ```
 Here is an animation what we did : 
-![animation](/Projet_2/Gif_ASP.gif)
+![animation](/images/Gif_ASP.gif)
 # Conclusion
-In conclusion, in this project, we successfully demonstrated how traffic engineering can be achieved using specific BGP attributes. We showcased the use of local preference, Multi-Exit Discriminator (MED), communities, and AS Path to redirect routes, establish backup paths during shutdowns, regain access to specific switches, and more. Mastery of BGP and its various features is essential for future network engineers, as it is the core protocol of the Internet. 
+In conclusion, this project successfully demonstrated how traffic engineering can be achieved using specific BGP attributes. We explored the use of local preference, Multi-Exit Discriminator (MED), communities, and AS Path to redirect routes, establish backup paths during failures, and regain access to specific switches. Each attribute was tested independently to showcase its unique advantages and impact on routing decisions.
+
+It is worth noting that these attributes can be combined to handle more complex scenarios. However, given the multitude of possibilities and interactions between attributes, it is not feasible to test all combinations within the scope of this project. The results underline the importance of understanding BGP’s capabilities and limitations to optimize network performance effectively. Future work could focus on exploring the behavior of combined attributes in various real-world topologies, providing deeper insights into advanced traffic engineering strategies.
